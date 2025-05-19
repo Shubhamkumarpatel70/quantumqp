@@ -53,8 +53,9 @@ npm run dev
 1. Create a new Web Service on Render
 2. Connect your GitHub repository
 3. Configure the service:
-   - Build Command: `npm install`
-   - Start Command: `npm start`
+   - Root Directory: `/` (leave empty for root)
+   - Build Command: `npm install && cd server && npm install`
+   - Start Command: `cd server && npm start`
    - Environment Variables:
      - PORT
      - MONGODB_URI
@@ -67,6 +68,7 @@ npm run dev
 1. Create a new Static Site on Render
 2. Connect your GitHub repository
 3. Configure the service:
+   - Root Directory: `/` (leave empty for root)
    - Build Command: `cd client && npm install && npm run build`
    - Publish Directory: `client/build`
    - Environment Variables:
