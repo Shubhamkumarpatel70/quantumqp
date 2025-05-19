@@ -68,23 +68,22 @@ app.use(cors({
 // Static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve React build files in production
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, '../client/build')));
-
-  // Handle React routing, return all requests to React app
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-}
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 
-// 404 Route - Move this after the production static file serving
+// Serve React build files in production
+if (process.env.NODE_ENV === 'production') {
+  const buildPath = path.join(__dirname, '../client/build');
+  app.use(express.static(buildPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+}
+
+// 404 Route
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
