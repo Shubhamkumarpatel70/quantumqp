@@ -70,10 +70,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve React build files in production
 if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app
   app.use(express.static(path.join(__dirname, '../client/build')));
 
+  // Handle React routing, return all requests to React app
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
   });
 }
 
@@ -82,7 +84,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 
-// 404 Route
+// 404 Route - Move this after the production static file serving
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
