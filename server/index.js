@@ -65,6 +65,12 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -73,18 +79,29 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Serve React build files in production
 if (process.env.NODE_ENV === 'production') {
   const buildPath = path.join(__dirname, '../client/build');
+  console.log('Serving static files from:', buildPath);
+
   app.use(express.static(buildPath));
 
-  app.get('*', (req, res) => {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
     res.sendFile(path.join(buildPath, 'index.html'));
   });
 }
 
 // 404 Route
 app.use((req, res) => {
+  console.log('404 Not Found:', req.method, req.url);
   res.status(404).json({ message: 'Route not found' });
 });
 
