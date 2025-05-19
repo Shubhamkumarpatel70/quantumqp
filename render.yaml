@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: quantum-qp-backend
+    env: node
+    buildCommand: npm install && cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: FRONTEND_URL
+        value: http://localhost:3000
+      - key: MONGO_URI
+        value: mongodb+srv://sp6122041:quantumqpuser@quantumqp.blzpea8.mongodb.net/?retryWrites=true&w=majority&appName=Quantumqp
+      - key: JWT_SECRET
+        value: supersecretpakikey
+      - key: EMAIL_USER
+        value: contact.codesera@gmail.com
+      - key: EMAIL_PASS
+        value: ptykykffsqftsdkq
+      - key: EMAIL_SERVICE
+        value: Gmail
+      - key: EMAIL_SENDER_NAME
+        value: Check My OTP Code
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_SECURE
+        value: false 

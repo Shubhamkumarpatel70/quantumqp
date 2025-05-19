@@ -14,14 +14,24 @@ import userRoutes from './routes/userRoutes.js';
 // Load env variables
 dotenv.config();
 
+// Log environment variables for debugging (excluding sensitive data)
+console.log('Environment:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('MONGO_URI exists:', !!process.env.MONGO_URI);
+console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
+console.log('EMAIL_PASS exists:', !!process.env.EMAIL_PASS);
+
 // Validate essential environment variables
 const REQUIRED_ENV_VARS = ['MONGO_URI', 'JWT_SECRET', 'EMAIL_USER', 'EMAIL_PASS'];
-REQUIRED_ENV_VARS.forEach((varName) => {
-  if (!process.env[varName]) {
-    console.error(`❌ Missing required environment variable: ${varName}`);
-    process.exit(1);
-  }
-});
+const missingVars = REQUIRED_ENV_VARS.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingVars.join(', '));
+  console.error('Please ensure all required environment variables are set in your deployment environment.');
+  process.exit(1);
+}
 
 // Define __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
