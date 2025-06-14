@@ -1,3 +1,8 @@
+/**
+ * Main server entry point for the application.
+ * Sets up Express, middleware, routes, and Socket.io for real-time communication.
+ */
+
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -10,8 +15,10 @@ import { Server } from 'socket.io';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import questionPaperRoutes from './routes/questionPaperRoutes.js';
+import academicRoutes from './routes/academicRoutes.js';
 
-// Load env variables
+// Load environment variables
 dotenv.config();
 
 // Log environment variables for debugging (excluding sensitive data)
@@ -74,10 +81,18 @@ app.use((req, res, next) => {
 // Static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Attach io to req for real-time updates in routes
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/question-papers', questionPaperRoutes);
+app.use('/api/academic', academicRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

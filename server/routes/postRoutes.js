@@ -2,6 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import express from 'express';
 import Post from '../models/Post.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -49,26 +50,64 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET: Fetch liked posts for the authenticated user
+router.get('/liked', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const posts = await Post.find({ likedBy: userId }).sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error('Error fetching liked posts:', err);
+    res.status(500).json({ error: 'Failed to fetch liked posts' });
+  }
+});
+
+// GET: Fetch a single post by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch post' });
+  }
+});
+
 // PUT: Like/unlike a post
-router.put('/:id/like', async (req, res) => {
+router.put('/:id/like', authenticateToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: 'Post not found' });
 
+    const userId = req.user._id;
     const { like } = req.body;
+
     if (like) {
-      post.likes += 1;
+      // Add like if user hasn't liked before
+      if (!post.likedBy.includes(userId)) {
+        post.likes += 1;
+        post.likedBy.push(userId);
+      }
     } else {
-      post.likes = Math.max(0, post.likes - 1);
+      // Remove like if user has liked before
+      if (post.likedBy.includes(userId)) {
+        post.likes = Math.max(0, post.likes - 1);
+        post.likedBy = post.likedBy.filter(id => id.toString() !== userId.toString());
+      }
     }
 
     await post.save();
 
     // Emit socket event to all connected clients
-    req.io.emit('postUpdated', post);
+    if (req.io) {
+      req.io.emit('postUpdated', post);
+    }
 
     res.status(200).json(post);
   } catch (err) {
+    console.error('Error updating like:', err);
     res.status(500).json({ error: 'Failed to update like' });
   }
 });

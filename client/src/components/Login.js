@@ -27,19 +27,17 @@ const Login = () => {
       const resData = response.data;
 
       if (resData.success) {
-        const { user, token } = resData.data;
-
         // Store token in localStorage
-        localStorage.setItem('token', token);
+        localStorage.setItem('token', resData.token);
 
         dispatch(setUser({
-          user: user.name,
-          token,
-          role: user.role,
+          user: resData.user.name,
+          token: resData.token,
+          role: resData.user.role,
         }));
 
         // Navigate based on role
-        navigate(user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard');
+        navigate(resData.user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard');
       } else {
         setError(resData.message || 'Login failed');
       }

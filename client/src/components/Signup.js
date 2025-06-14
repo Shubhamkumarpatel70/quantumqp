@@ -13,30 +13,27 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Invalid email address.');
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
 
     try {
-      // Register the user
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/signup`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/signup`, {
         name: name.trim(),
         email: email.trim(),
         password,
+        role: 'user'
       });
 
-      // Navigate to OTP verification page
+      if (response.data.data?.token) {
+        localStorage.setItem('token', response.data.data.token);
+      } else {
+        throw new Error('Authentication token not received');
+      }
+
+      // Proceed with OTP verification
       navigate('/verify-otp', { state: { email: email.trim() } });
     } catch (err) {
-      console.error('Signup Error:', err); // Log the error for debugging
-      setError(err?.response?.data?.message || 'Signup failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -73,7 +70,7 @@ const Signup = () => {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Full Name
@@ -137,7 +134,7 @@ const Signup = () => {
                   ) : (
                     <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   )}
                 </button>
